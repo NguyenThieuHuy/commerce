@@ -1,0 +1,92 @@
+{% extends 'auctions/layout.html' %}
+
+{% block body %}
+<!--Open-->
+
+{%if item.active == True%}
+    <h1>{{item.title}}</h1>
+    {%if item.image != "" %}
+    <img src="http://127.0.0.1:8000/media/{{item.image}}" width="500" height="600">
+    {%endif%}
+    {%if item.link != "" %}
+    {%if item.link != default_if_none %}
+    <img src="{{item.link}}" width="500" height="600">
+    {%endif%}
+    {%endif%}
+    <div>Owner:{{item.owner}}</div>
+    <div>Created on:{{item.initial_time}}</div>
+    <div>Last edited on:{{item.end_time}}</div>
+    <ul>
+        {%for cate in item.category.all%}
+        <li>{{cate}}</li>
+        {% endfor %}
+    </ul>
+    <div> {{item.description}}</div>
+    <div> {{item.price}}$</div>
+    <h4>Place your bid:</h4>
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    <form action="{% url 'bid' item.id %}" method="POST">
+        {% csrf_token %}
+        <input type="number" name="bid" min={{item.price}} placeholder="your bid...">
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+
+        {% if item.owner.id == user.id %}
+            <a href={% url 'edit' item.id %} class="btn btn-primary">Edit</a>
+            </br></br>
+            <form action="{% url 'opencloselisting' item.id %}" method="POST">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary">Close</button>
+            </form>
+        {% endif %}
+
+        <h4>Comment:</h4>
+        <form action="{% url 'comment' item.id %}" method="POST">
+            {% csrf_token %}
+            <input type="text" name="comment" required/>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+
+        {% for comment in comments %}
+            <div>
+                <small><strong>{{comment.user|title}}</strong></small>
+                <p>{{comment.comment}}</p>
+            </div>
+        {% endfor %}
+<!--Closed-->
+
+{% else %}
+    This listing is closed!!
+    <h1>{{item.title}}</h1>
+    {%if item.image != "" %}
+    <img src="http://127.0.0.1:8000/media/{{item.image}}" width="500" height="600">
+    {%endif%}
+    {%if item.link != default_if_none %}
+    <img src="{{item.link}}" width="500" height="600">
+    {%endif%}
+    <div>Owner:{{item.owner}}</div>
+    <div>Created on:{{item.initial_time}}</div>
+    <div>End on:{{item.end_time}}</div>
+    <ul>
+        {%for cate in item.category.all%}
+        <li>{{cate}}</li>
+        {% endfor %}
+    </ul>
+    <div> {{item.description}}</div>
+    <div> Final price: {{item.price}}$</div>
+    <div> Winner: Blank</div>
+
+    {% if item.owner.id == user.id %}
+        <form action="{% url 'opencloselisting' item.id %}" method="POST">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary">Reopen</button>
+        </form>
+    {% endif %}
+{% endif %}
+{% endblock body %}

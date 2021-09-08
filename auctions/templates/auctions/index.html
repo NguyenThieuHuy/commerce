@@ -1,0 +1,15 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>Active Listings</h2>
+    {% if message %}
+        <div>{{ message }}</div>
+    {% endif %}
+    {% for item in items %}
+    <li>
+    <a href={% url 'item' item.id %}>
+        This is {{item.id}}: {{item.title}} of {{item.owner}}.
+    </a>
+    </li>
+{% endfor %}
+{% endblock %}

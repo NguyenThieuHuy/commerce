@@ -1,0 +1,38 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+
+    <h2>Make your new Listing</h2>
+
+    {% if message %}
+        <div>{{ message }}</div>
+    {% endif %}
+    <form action={% url 'edit' item.id %} method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <input class="form-control" autofocus type="text" name="Title" value = "{{item.title}}" placeholder="What're you selling?">
+        </div>
+        <div class="form-group">
+            <input class="form-control" type="text" name="Description" value = "{{item.description}}">
+        </div>
+        <div class="form-group">
+            <input class="form-control" type="number" name="Price" value = "{{item.price}}" placeholder="Starting price">
+        </div>
+        <!--<div class="form-group">
+            <select name="Category"multiple>
+                {%for cate in category%}
+                <option value="{{cate.id}}"
+                >
+                {{cate}}
+                </option>
+                {% endfor %}
+            </select>
+        </div> -->
+        <div class="form-group">
+            <label>Image link (optional)</label>
+            <input type="text" class="form-control" id="exampleFormControlInput1" placeholder="https://blah-blah.jpg..." value="{{item.link}}" name="link">
+        </div>
+
+        <input class="btn btn-primary" type="submit" value="Confirm edit">
+    </form>
+{% endblock %}
