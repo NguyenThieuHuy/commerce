@@ -20,12 +20,15 @@
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'index' %}">Active Listings</a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'wishlist' %}">Your Wishlist</a>
+            </li>
             <li class="nav-item dropdown show">
                 <a class="nav-link" class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 Categories</a>
                   <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
                     {% for category in categories %}
-                        <a class="dropdown-item" href="#">
+                        <a class="dropdown-item" href="{% url 'category' category.id %}">
                             {{category.category}}
                         </a>
                     {% endfor %}

@@ -23,6 +23,12 @@
     </ul>
     <div> {{item.description}}</div>
     <div> {{item.price}}$</div>
+
+    <form action="{% url 'addtowishlist' item.id %}" method="POST">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-primary">Addtowishlist</button>
+    </form>
+
     <h4>Place your bid:</h4>
     {% if messages %}
         <ul class="messages">

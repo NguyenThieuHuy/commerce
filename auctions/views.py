@@ -1,7 +1,7 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.db import IntegrityError
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, request
 from django.http.response import HttpResponseServerError
 from django.shortcuts import render,redirect
 from django.urls import reverse
@@ -11,13 +11,11 @@ from .models import User,Bid,Comment,Listing,Category
 
 
 def index(request):
-    categories=Category.objects.all()
     items=Listing.objects.all()
     return render(request, "auctions/index.html",{
         "items":items,
-        "categories":categories
+        "categories":Category.objects.all()
     })
-
 
 def login_view(request):
     if request.method == "POST":
@@ -33,10 +31,12 @@ def login_view(request):
             return HttpResponseRedirect(reverse("index"))
         else:
             return render(request, "auctions/login.html", {
-                "message": "Invalid username and/or password."
+                "message": "Invalid username and/or password.",
             })
     else:
-        return render(request, "auctions/login.html")
+        return render(request, "auctions/login.html",{
+            "categories":Category.objects.all()
+        })
 
 
 def logout_view(request):
@@ -54,7 +54,7 @@ def register(request):
         confirmation = request.POST["confirmation"]
         if password != confirmation:
             return render(request, "auctions/register.html", {
-                "message": "Passwords must match."
+                "message": "Passwords must match.",
             })
 
         # Attempt to create new user
@@ -63,12 +63,14 @@ def register(request):
             user.save()
         except IntegrityError:
             return render(request, "auctions/register.html", {
-                "message": "Username already taken."
+                "message": "Username already taken.",
             })
         login(request, user)
         return HttpResponseRedirect(reverse("index"))
     else:
-        return render(request, "auctions/register.html")
+        return render(request, "auctions/register.html",{
+            "categories":Category.objects.all()
+        })
 
 
 def create(request):
@@ -91,6 +93,7 @@ def create(request):
         return HttpResponseRedirect(reverse("item",args=(listing.id,)))
     return render(request,"auctions/create.html",{
         "category": Category.objects.all(),
+        "categories":Category.objects.all()
     })
 
 def edit(request,item_id):
@@ -109,6 +112,7 @@ def edit(request,item_id):
             return render(request,"auctions/edit.html",{
             "item":item,
             "category": Category.objects.all(),
+            "categories":Category.objects.all()
             })
         else:
             return render(request,"auctions/index.html",{
@@ -127,6 +131,7 @@ def page(request,item_id):
         "item":item,
         "user":user,
         "comments":comment,
+        "categories":Category.objects.all()
     })
 
 def bid(request,item_id):
@@ -142,6 +147,9 @@ def bid(request,item_id):
                 bid.save()
                 item.price = request.POST["bid"]
                 item.save()
+                followed = User.objects.filter(pk=user.id)
+                for f in followed:
+                    f.following.add(item)
                 return HttpResponseRedirect(reverse("item",args=(item_id,)))
             else:
                 messages.info(request, 'Your bid must be greater than the current price!')
@@ -171,7 +179,8 @@ def category(request, category_id):
     category = Category.objects.get(id=category_id)
     return render(request,"auctions/category.html",{
         "category": category,
-        "listings": category.categories.all()
+        "listings": category.categories.all(),
+        "categories":Category.objects.all()
     })
 
 def opencloselisting(request,item_id):
@@ -192,6 +201,18 @@ def opencloselisting(request,item_id):
             return HttpResponseRedirect(reverse("item",args=(item_id,)))
     pass
 
+def winnerdeclare(request):
+    pass
+
+def wishlist(request):
+    user = request.user
+    item = Listing.objects.filter(followed=user.id)
+    return render(request,"auctions/wishlist.html",{
+    "user" : user,
+    "item":item,
+    "categories":Category.objects.all()
+    })
+
 def addtowishlist(request,item_id):
     item=Listing.objects.get(pk=item_id)
     user = request.user
@@ -200,7 +221,4 @@ def addtowishlist(request,item_id):
         for f in followed:
             f.following.add(item)
         return HttpResponseRedirect(reverse("item",args=(item_id,)))
-    pass
-
-def winnerdeclare(request):
     pass
