@@ -86,7 +86,7 @@
     </ul>
     <div> {{item.description}}</div>
     <div> Final price: {{item.price}}$</div>
-    <div> Winner: Blank</div>
+    <div> Winner: {{winner}}</div>
 
     {% if item.owner.id == user.id %}
         <form action="{% url 'opencloselisting' item.id %}" method="POST">

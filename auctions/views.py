@@ -127,10 +127,12 @@ def page(request,item_id):
     user = request.user
     item=Listing.objects.get(pk=item_id)
     comment=Comment.objects.filter(location=item)
+    winner = item.winner
     return render(request, "auctions/listingpage.html",{
         "item":item,
         "user":user,
         "comments":comment,
+        "winner":winner,
         "categories":Category.objects.all()
     })
 
@@ -188,6 +190,24 @@ def opencloselisting(request,item_id):
     user = request.user
     if request.method == "POST":
         if user == item.owner:
+            #_______Winner_______#
+            if item.active == True:
+                bid = Bid.objects.filter(location=item)
+                for b in bid:
+                    if b.bid == item.price:
+                        b.is_this_a_winning_bid = True
+                        b.save()
+                        item.winner = b.user
+                        item.save()
+                    else:
+                        b.is_this_a_winning_bid = False
+                        b.save()
+            else:
+                bid = Bid.objects.filter(location=item)
+                for b in bid:
+                    b.is_this_a_winning_bid = False
+                    b.save()
+            #_______________#
             if item.active == True:
                 item.active = False
                 item.save()
@@ -199,10 +219,9 @@ def opencloselisting(request,item_id):
         else:
             messages.info(request, 'You do not have the authority to edit this page!!!!!')
             return HttpResponseRedirect(reverse("item",args=(item_id,)))
+
     pass
 
-def winnerdeclare(request):
-    pass
 
 def wishlist(request):
     user = request.user
