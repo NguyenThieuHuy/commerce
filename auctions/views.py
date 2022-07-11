@@ -11,10 +11,12 @@ from .models import User,Bid,Comment,Listing,Category
 
 
 def index(request):
+    user = request.user
     items=Listing.objects.all()
     return render(request, "auctions/index.html",{
         "items":items,
-        "categories":Category.objects.all()
+        "categories":Category.objects.all(),
+        "numsWish": Listing.objects.filter(followed=user.id).count(),
     })
 
 def login_view(request):
@@ -133,7 +135,8 @@ def page(request,item_id):
         "user":user,
         "comments":comment,
         "winner":winner,
-        "categories":Category.objects.all()
+        "categories":Category.objects.all(),
+        "numsWish": Listing.objects.filter(followed=user.id).count(),
     })
 
 def bid(request,item_id):
@@ -178,11 +181,13 @@ def comment(request,item_id):
     pass
 
 def category(request, category_id):
+    user = request.user
     category = Category.objects.get(id=category_id)
     return render(request,"auctions/category.html",{
         "category": category,
         "listings": category.categories.all(),
-        "categories":Category.objects.all()
+        "categories":Category.objects.all(),
+        "numsWish": Listing.objects.filter(followed=user.id).count(),
     })
 
 def opencloselisting(request,item_id):
@@ -229,7 +234,8 @@ def wishlist(request):
     return render(request,"auctions/wishlist.html",{
     "user" : user,
     "item":item,
-    "categories":Category.objects.all()
+    "categories":Category.objects.all(),
+    "numsWish": Listing.objects.filter(followed=user.id).count(),
     })
 
 def addtowishlist(request,item_id):

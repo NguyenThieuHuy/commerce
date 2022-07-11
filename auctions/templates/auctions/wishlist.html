@@ -1,14 +1,26 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
+<div class="container">
     <h2>{{user}}'s Wishlist</h2>
-    <ul>
     {% for item in item %}
-        <li>
-        <a href={% url 'item' item.id %}>
-        {{item.title}}
-        </a>
-        </li>
+      <div class="media">
+        <div class="media-left media-top">
+          <img src="http://127.0.0.1:8000/media/{{item.image}}" onerror="this.onerror=null; this.src='http://127.0.0.1:8000/media/images/Default.jpg'" alt="NOT FOUND"class="media-object img-rounded" style="width:100px;height:80px">
+        </div>
+        <div class="media-body">
+          <h4 class="media-heading">
+            <a href={% url 'item' item.id %}>
+            {{item.title}}
+            </a>
+            {% if item.active %}<span class="label label-success">Open</span>{% else %}<span class="label label-danger">Closed</span> Winner: {{item.winner}}{% endif %}
+          </h4>
+          <p>Owner: {{item.owner}}</p>
+          <p>Price: ${{item.price}}</p>
+          <p>{{item.description}}</p>
+        </div>
+      </div>
+      <hr>
     {% endfor %}
-    </ul>
+</div>
 {% endblock %}

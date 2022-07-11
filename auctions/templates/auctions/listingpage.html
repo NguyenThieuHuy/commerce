@@ -1,98 +1,175 @@
 {% extends 'auctions/layout.html' %}
 
 {% block body %}
+<div class="container">
 <!--Open-->
+{% if messages %}
+<span class="messages">
+    {% for message in messages %}
+    <div{% if message.tags %} class="{{ message.tags }} alert alert-danger"{% endif %}>{{ message }}</div>
+    {% endfor %}
+</span>
+{% endif %}
 
 {%if item.active == True%}
-    <h1>{{item.title}}</h1>
-    {%if item.image != "" %}
-    <img src="http://127.0.0.1:8000/media/{{item.image}}" width="500" height="600">
-    {%endif%}
-    {%if item.link != "" %}
-    {%if item.link != default_if_none %}
-    <img src="{{item.link}}" width="500" height="600">
-    {%endif%}
-    {%endif%}
-    <div>Owner:{{item.owner}}</div>
-    <div>Created on:{{item.initial_time}}</div>
-    <div>Last edited on:{{item.end_time}}</div>
-    <ul>
-        {%for cate in item.category.all%}
-        <li>{{cate}}</li>
-        {% endfor %}
-    </ul>
-    <div> {{item.description}}</div>
-    <div> {{item.price}}$</div>
-
-    <form action="{% url 'addtowishlist' item.id %}" method="POST">
-    {% csrf_token %}
-    <button type="submit" class="btn btn-primary">Addtowishlist</button>
-    </form>
-
-    <h4>Place your bid:</h4>
-    {% if messages %}
-        <ul class="messages">
-            {% for message in messages %}
-            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
-    <form action="{% url 'bid' item.id %}" method="POST">
-        {% csrf_token %}
-        <input type="number" name="bid" min={{item.price}} placeholder="your bid...">
-        <button type="submit" class="btn btn-primary">Submit</button>
-    </form>
-
+    <div style="display:flex; justify-content:space-evenly;">
         {% if item.owner.id == user.id %}
-            <a href={% url 'edit' item.id %} class="btn btn-primary">Edit</a>
-            </br></br>
-            <form action="{% url 'opencloselisting' item.id %}" method="POST">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-primary">Close</button>
-            </form>
-        {% endif %}
-
-        <h4>Comment:</h4>
-        <form action="{% url 'comment' item.id %}" method="POST">
-            {% csrf_token %}
-            <input type="text" name="comment" required/>
-            <button type="submit" class="btn btn-primary">Submit</button>
+        <a href={% url 'edit' item.id %} class="btn btn-secondary">Edit</a>
+        <form action="{% url 'opencloselisting' item.id %}" method="POST">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Close</button>
         </form>
-
-        {% for comment in comments %}
-            <div>
-                <small><strong>{{comment.user|title}}</strong></small>
-                <p>{{comment.comment}}</p>
-            </div>
+        {% endif %}
+    </div>
+    <h2 class="h1">{{item.title}}</h2>
+    <!-- Carousel container -->
+    <div id="my-pics" class="carousel slide" data-ride="carousel" style="width:90%;height:500px;margin:auto;">
+    <!-- Indicators -->
+    <ol class="carousel-indicators">
+    <li data-target="#my-pics" data-slide-to="0" class="active"></li>
+    <li data-target="#my-pics" data-slide-to="1"></li>
+    </ol>
+    <!-- Content -->
+    <div class="carousel-inner" role="listbox">
+    <!-- Slide 1 -->
+    <div class="item active">
+        {%if item.image != "" %}
+        <img src="http://127.0.0.1:8000/media/{{item.image}}"style="height:500px;margin:auto;">
+        {%endif%}
+    </div>
+    <!-- Slide 2 -->
+    <div class="item">
+        {%if item.link != "" %}
+        {%if item.link != default_if_none %}
+        <img src="{{item.link}}"style="height:500px;margin:auto;">
+        {%endif%}
+        {%endif%}
+    </div>
+    </div>
+    <!-- Previous/Next controls -->
+    <a class="left carousel-control" href="#my-pics" role="button" data-slide="prev">
+    <span class="icon-prev" aria-hidden="true"></span>
+    <span class="sr-only">Previous</span>
+    </a>
+    <a class="right carousel-control" href="#my-pics" role="button" data-slide="next">
+    <span class="icon-next" aria-hidden="true"></span>
+    <span class="sr-only">Next</span>
+    </a>
+    </div><br>
+    <hr>
+    <div><strong>Owner:     </strong>{{item.owner}}</div>
+    <div><strong>Created on:    </strong>{{item.initial_time}}</div>
+    <div><strong>Last edited on:    </strong>{{item.end_time}}</div>
+    <strong>Categories:     </strong>
+        {%for cate in item.category.all%}
+        <a class="label label-info"href="{% url 'category' cate.id %}">{{cate}}</a>
         {% endfor %}
+    <hr><strong>Description:</strong>
+    <div> {{item.description}}</div>
+    <div class="col-sm-3"><strong>Prices:  </strong> {{item.price}}$</div>
+    <div class="col-sm-6" style="display:flex;">
+        <strong>Place your bid:     </strong>
+        <form action="{% url 'bid' item.id %}" method="POST">
+            {% csrf_token %}
+            <div class="input-group">
+                <input type="number" class="form-control" name="bid" min={{item.price}} placeholder="your bid..." required>
+                <div class="input-group-btn">
+                    <button type="submit" class="btn btn-secondary">Bid</button>
+                </div>
+            </div>  
+        </form>
+    </div>
+    <div class="col-sm-3">
+        <form action="{% url 'addtowishlist' item.id %}" method="POST">
+        {% csrf_token %}
+        <span class="glyphicon glyphicon-star"></span>
+        <button type="submit" class="btn btn-success">Follow</button>
+        </form>
+    </div>
+    <br><br> 
+    <div>
+    <form action="{% url 'comment' item.id %}" method="POST">
+        {% csrf_token %}
+        <h3>New Comment</h3>
+        <textarea class="form-control" rows="3" id="comment" name="comment" required></textarea>  
+        <button type="submit" class="btn btn-primary">Submit</button>	
+    </form>
+    <hr>
+    <h3>Comments</h3>
+    {% for comment in comments %}
+        <div class="well well-sm"><strong>{{comment.user|title}}</strong>: {{comment.comment}}</div>
+    {% endfor %}
+    </div>
 <!--Closed-->
 
 {% else %}
-    This listing is closed!!
-    <h1>{{item.title}}</h1>
-    {%if item.image != "" %}
-    <img src="http://127.0.0.1:8000/media/{{item.image}}" width="500" height="600">
-    {%endif%}
-    {%if item.link != default_if_none %}
-    <img src="{{item.link}}" width="500" height="600">
-    {%endif%}
-    <div>Owner:{{item.owner}}</div>
-    <div>Created on:{{item.initial_time}}</div>
-    <div>End on:{{item.end_time}}</div>
-    <ul>
-        {%for cate in item.category.all%}
-        <li>{{cate}}</li>
-        {% endfor %}
-    </ul>
-    <div> {{item.description}}</div>
-    <div> Final price: {{item.price}}$</div>
-    <div> Winner: {{winner}}</div>
-
-    {% if item.owner.id == user.id %}
+    <div class="alert alert-danger">This listing is closed!!</div>
+    <div>
+        {% if item.owner.id == user.id %}
         <form action="{% url 'opencloselisting' item.id %}" method="POST">
         {% csrf_token %}
-        <button type="submit" class="btn btn-primary">Reopen</button>
+        <button type="submit" class="btn btn-success pull-left">Reopen</button>
         </form>
-    {% endif %}
+        {% endif %}
+    </div>
+    <h2 class="h1">{{item.title}}</h2>
+    <!-- Carousel container -->
+    <div id="my-pics" class="carousel slide" data-ride="carousel" style="width:90%;height:500px;margin:auto;">
+    <!-- Indicators -->
+    <ol class="carousel-indicators">
+    <li data-target="#my-pics" data-slide-to="0" class="active"></li>
+    <li data-target="#my-pics" data-slide-to="1"></li>
+    </ol>
+    <!-- Content -->
+    <div class="carousel-inner" role="listbox">
+    <!-- Slide 1 -->
+    <div class="item active">
+        {%if item.image != "" %}
+        <img src="http://127.0.0.1:8000/media/{{item.image}}"style="height:500px;margin:auto;">
+        {%endif%}
+    </div>
+    <!-- Slide 2 -->
+    <div class="item">
+        {%if item.link != "" %}
+        {%if item.link != default_if_none %}
+        <img src="{{item.link}}"style="height:500px;margin:auto;">
+        {%endif%}
+        {%endif%}
+    </div>
+    </div>
+    <!-- Previous/Next controls -->
+    <a class="left carousel-control" href="#my-pics" role="button" data-slide="prev">
+    <span class="icon-prev" aria-hidden="true"></span>
+    <span class="sr-only">Previous</span>
+    </a>
+    <a class="right carousel-control" href="#my-pics" role="button" data-slide="next">
+    <span class="icon-next" aria-hidden="true"></span>
+    <span class="sr-only">Next</span>
+    </a>
+    </div><br>
+    <hr>
+    <div><strong>Owner:     </strong>{{item.owner}}</div>
+    <div><strong>Created on:    </strong>{{item.initial_time}}</div>
+    <div><strong>End on:    </strong>{{item.end_time}}</div>
+    <strong>Categories:     </strong>
+        {%for cate in item.category.all%}
+        <a class="label label-info"href="{% url 'category' cate.id %}">{{cate}}</a>
+        {% endfor %}
+    <hr><strong>Description:</strong>
+    <div> {{item.description}}</div>
+    <br>
+    <div class="col-sm-6 text-center"><strong>Final price:  </strong> {{item.price}}$</div>
+    <div class="col-sm-6 text-center">
+        <div><strong>Winner:     </strong>{{winner}}</div>
+    </div>
+    <br><br> 
+    <div>
+    <hr>
+    <h3>Comments</h3>
+    {% for comment in comments %}
+        <div class="well well-sm"><strong>{{comment.user|title}}</strong>: {{comment.comment}}</div>
+    {% endfor %}
+    </div>
 {% endif %}
+</div>
 {% endblock body %}
